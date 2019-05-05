@@ -41,7 +41,7 @@ def fill_missing_age(rows):
     else:
         return Age
 
-train['Boy'], test['Boy'] = [(df.Name.str.split().str[1] == 'Master.').astype('int') for df in [train, test]]
+train['isMaster'], test['isMaster'] = [(df.Name.str.split().str[1] == 'Master.').astype('int') for df in [train, test]]
 
 sex_train = pd.get_dummies(train['Sex'],drop_first=True)
 embark_train = pd.get_dummies(train['Embarked'],drop_first=True)
