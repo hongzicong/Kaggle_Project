@@ -41,13 +41,12 @@ def fill_missing_age(rows):
     else:
         return Age
 
-train['Surname'], test['Surname'] = [df.Name.str.split(',').str[0] for df in [train, test]]
+train['Boy'], test['Boy'] = [(df.Name.str.split().str[1] == 'Master.').astype('int') for df in [train, test]]
 
 sex_train = pd.get_dummies(train['Sex'],drop_first=True)
 embark_train = pd.get_dummies(train['Embarked'],drop_first=True)
-surname_train = pd.get_dummies(train['Surname'],drop_first=True)
-train = train.drop(['Sex', 'Embarked', 'Name', 'Ticket', 'Surname'],axis=1)
-train = pd.concat([train, sex_train, embark_train, surname_train],axis=1)
+train = train.drop(['Sex', 'Embarked', 'Name', 'Ticket'],axis=1)
+train = pd.concat([train, sex_train, embark_train],axis=1)
 
 train['Age'] = train[['Age','Pclass']].apply(fill_missing_age, axis=1)
 
@@ -57,9 +56,8 @@ train.dropna(inplace=True)
 
 sex_test = pd.get_dummies(test['Sex'],drop_first=True)
 embark_test = pd.get_dummies(test['Embarked'],drop_first=True)
-surname_test = pd.get_dummies(test['Surname'],drop_first=True)
-test = test.drop(['Sex', 'Embarked', 'Name','Ticket', 'Surname'],axis=1)
-test = pd.concat([test, sex_test, embark_test, surname_test],axis=1)
+test = test.drop(['Sex', 'Embarked', 'Name','Ticket'],axis=1)
+test = pd.concat([test, sex_test, embark_test],axis=1)
 
 test['Age'] = test[['Age','Pclass']].apply(fill_missing_age, axis=1)
 
@@ -71,7 +69,7 @@ X_train, X_test, y_train, y_test = train_test_split(train.drop('Survived',axis=1
                                                     train['Survived'], test_size=0.20, 
                                                     random_state=101)
 
-logmodel = LogisticRegression(C=0.9)
+logmodel = LogisticRegression()
 
 logmodel.fit(X_train,y_train)
 
