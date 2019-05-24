@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import cross_validation, metrics
 import time as tm
 
-RANDOM_SEED = 30
+RANDOM_SEED = 106
 
 time_begin = tm.time()
 
@@ -32,7 +32,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random
 
 # 使用随机森林
 
-rfc = RandomForestClassifier(n_estimators=2000, oob_score = True, 
+rfc = RandomForestClassifier(n_estimators=500, oob_score = True, 
                              criterion="entropy", n_jobs=-1, random_state = RANDOM_SEED)
 
 rfc.fit(x_train, y_train)
@@ -51,7 +51,7 @@ print(rfc.score(x_test, y_test))
 print(classification_report(y_test, rfc_y_predict,digits=4))
 
 # x_test = pd.concat([data_test.iloc[:, :10], data_test.iloc[:, 11:]], axis = 1)
-# result = rfc.predict(x_test)
+# result = rfc.predict(data_test)
 # pd.Series(result).to_csv('result.csv')
 
 print(tm.time() - time_begin)
