@@ -1,2 +1,2 @@
-# NN_Kaggle_Project
+# Kaggle_Project
 Homework
