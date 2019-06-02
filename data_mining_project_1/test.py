@@ -4,20 +4,24 @@ Created on Tue Mar 26 21:47:23 2019
 
 @author: Dv00
 """
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 26 21:47:23 2019
 
+@author: Dv00
+"""
 
 import pandas as pd
 import numpy as np
-from sklearn.metrics import classification_report
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.cross_validation import train_test_split
-
-from sklearn.metrics import roc_curve
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import cross_validation, metrics
 import time as tm
 
-RANDOM_SEED = 14
+RANDOM_SEED = 120
+
+time_begin = tm.time()
 
 data_train = pd.read_csv("C:/Users/Dv00/Desktop/new1datamining2019spring/trainSet.csv")
 data_test = pd.read_csv("C:/Users/Dv00/Desktop/new1datamining2019spring/test set.csv")
@@ -25,56 +29,38 @@ data_test = pd.read_csv("C:/Users/Dv00/Desktop/new1datamining2019spring/test set
 #data_train = pd.read_csv("../../new1datamining2019spring/trainSet.csv")
 #data_test = pd.read_csv("../../new1datamining2019spring/test set.csv")
 
+
 x = data_train.iloc[:, 0:-1]
 y = data_train.iloc[:, -1]
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=RANDOM_SEED)
+for i in range(30):
 
-# Set the parameters by cross-validation
-parameter_space = {
-    "n_estimators": [30],
-    "criterion": ["entropy", "gini"],
-    "min_samples_leaf": [1, 2],
-}
- 
-time_begin = tm.time()
-
-#scores = ['precision', 'recall', 'roc_auc']
-scores = ['roc_auc']
- 
-for score in scores:
-    print("# Tuning hyper-parameters for %s" % score)
-    print()
- 
-    clf = RandomForestClassifier(random_state=RANDOM_SEED, oob_score = True)
-    grid = GridSearchCV(clf, parameter_space, cv=5, scoring='%s' % score)
-    #scoring='%s_macro' % score：precision_macro、recall_macro是用于multiclass/multilabel任务的
-    grid.fit(x_train, y_train)
- 
-    print("Best parameters set found on development set:")
-    print()
-    print(grid.best_params_)
-    print()
-    print("Grid scores on development set:")
-    print()
-    means = grid.cv_results_['mean_test_score']
-    stds = grid.cv_results_['std_test_score']
-    for mean, std, params in zip(means, stds, grid.cv_results_['params']):
-        print("%0.3f (+/-%0.03f) for %r"
-              % (mean, std * 2, params))
-    print()
-    print("Detailed classification report:")
-    print()
-    print("The model is trained on the full development set.")
-    print("The scores are computed on the full evaluation set.")
-    print()
-    bclf = grid.best_estimator_
-    bclf.fit(x_train, y_train)
-    y_true = y_test
-    y_pred = bclf.predict(x_test)
-    y_pred_pro = bclf.predict_proba(x_test)
-    y_scores = pd.DataFrame(y_pred_pro, columns=bclf.classes_.tolist())[1].values
-    print(classification_report(y_true, y_pred))
-    auc_value = roc_auc_score(y_true, y_scores)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state = 106)
     
+    
+    # 使用随机森林
+    rfc = RandomForestClassifier(n_estimators=200, oob_score = True, 
+                                 criterion="entropy", n_jobs=-1, random_state = RANDOM_SEED + i)
+    
+    rfc.fit(x_train, y_train)
+    
+    rfc_y_predict = rfc.predict(x_test)
+    
+    #获取特征的重要性
+    #importances = rfc.feature_importances_
+    #indices = np.argsort(importances)[::-1]
+    #cols_name = data_train.columns[:-1]
+    #for f in range(x_train.shape[1]):
+    #    print("%2d) %-*s %f" % (f + 1,30,cols_name[indices[f]],importances[indices[f]]))
+    
+    print("Random seed: %d" % (RANDOM_SEED + i))
+    
+    print(rfc.score(x_test, y_test))
+    
+    print(classification_report(y_test, rfc_y_predict,digits=4))
+    
+    # x_test = pd.concat([data_test.iloc[:, :10], data_test.iloc[:, 11:]], axis = 1)
+    # result = rfc.predict(data_test)
+    # pd.Series(result).to_csv('result.csv')
+
 print(tm.time() - time_begin)

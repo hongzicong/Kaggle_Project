@@ -27,13 +27,13 @@ data_test = pd.read_csv("C:/Users/Dv00/Desktop/new1datamining2019spring/test set
 x = data_train.iloc[:, 0:-1]
 y = data_train.iloc[:, -1]
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state = RANDOM_SEED)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state = 106)
 
 
 # 使用随机森林
 
-rfc = RandomForestClassifier(n_estimators=500, oob_score = True, 
-                             criterion="entropy", n_jobs=-1, random_state = RANDOM_SEED)
+rfc = RandomForestClassifier(n_estimators=200, oob_score = True, 
+                             criterion="entropy", n_jobs=-1, random_state = 106)
 
 rfc.fit(x_train, y_train)
 
