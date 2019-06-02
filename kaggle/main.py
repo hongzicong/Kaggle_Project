@@ -23,17 +23,18 @@ data_test = pd.read_csv("C:/Users/Dv00/Desktop/new1datamining2019spring/test set
 #data_train = pd.read_csv("../../new1datamining2019spring/trainSet.csv")
 #data_test = pd.read_csv("../../new1datamining2019spring/test set.csv")
 
+#data_train['F9'] = np.log1p(data_train['F9'])
+#data_test['F9'] = np.log1p(data_test['F9'])
 
 x = data_train.iloc[:, 0:-1]
 y = data_train.iloc[:, -1]
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state = 106)
-
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state = 438)
 
 # 使用随机森林
 
-rfc = RandomForestClassifier(n_estimators=200, oob_score = True, 
-                             criterion="entropy", n_jobs=-1, random_state = 106)
+rfc = RandomForestClassifier(n_estimators=2000, oob_score = True, min_samples_split=190, min_samples_leaf=8,
+                             criterion="gini", n_jobs=-1, random_state = 321)
 
 rfc.fit(x_train, y_train)
 
@@ -52,6 +53,6 @@ print(classification_report(y_test, rfc_y_predict,digits=4))
 
 # x_test = pd.concat([data_test.iloc[:, :10], data_test.iloc[:, 11:]], axis = 1)
 # result = rfc.predict(data_test)
-# pd.Series(result).to_csv('result.csv')
+# pd.DataFrame(result,columns=['Predicted'],index=list(range(1,len(result) + 1))).to_csv('result.csv')
 
 print(tm.time() - time_begin)
