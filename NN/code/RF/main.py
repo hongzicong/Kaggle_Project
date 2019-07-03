@@ -1,27 +1,23 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jun 28 09:09:49 2019
+
+@author: Dv00
+"""
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt;
 import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 
-sns.set()
+RANDOM_STATE = 1
 
-train, test = pd.read_csv('../data/train.csv'), pd.read_csv('../data/test.csv')
+train, test = pd.read_csv('../../data/train.csv'), pd.read_csv('../../data/test.csv')
 
 missing=train.columns[train.isnull().any()].tolist()
-
-# print(train[missing].isnull().sum() / 891)
-
-#plt.figure()
-#corrMat = train.corr()
-#mask = np.array(corrMat)
-#mask[np.tril_indices_from(mask)] = False
-#sns.set(font_scale=1)
-#sns.heatmap(corrMat, mask=mask,vmax=.8, square=True,annot=True,cmap="YlGnBu")
-#plt.xticks(rotation=30)
-#plt.yticks(rotation=30)
 
 def fill_missing_age(rows):
     Age = rows[0]
@@ -67,16 +63,22 @@ test['Fare'].fillna(test['Fare'].mean(), inplace=True)
 
 X_train, X_test, y_train, y_test = train_test_split(train.drop('Survived',axis=1), 
                                                     train['Survived'], test_size=0.20, 
-                                                    random_state=101)
+                                                    random_state=RANDOM_STATE)
 
-logmodel = LogisticRegression()
+rfmodel = RandomForestClassifier(criterion='gini', 
+                                 n_estimators=100,
+                                 min_samples_split=9,
+                                 min_samples_leaf=5,
+                                 oob_score=True,
+                                 random_state=RANDOM_STATE,
+                                 n_jobs=-1)
 
-logmodel.fit(X_train,y_train)
+rfmodel.fit(X_train,y_train)
 
-train_predictions = logmodel.predict(X_test)
-print(classification_report(y_test, train_predictions))
+train_predictions = rfmodel.predict(X_test)
+print(classification_report(y_test, train_predictions, digits=4))
 
-predictions = pd.DataFrame(logmodel.predict(test), columns= ['Survived'])
+predictions = pd.DataFrame(rfmodel.predict(test), columns= ['Survived'])
 
 predictions = pd.concat([test['PassengerId'], predictions], axis=1, join='inner')
 
