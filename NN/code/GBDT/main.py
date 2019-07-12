@@ -65,8 +65,10 @@ X_train, X_test, y_train, y_test = train_test_split(train.drop('Survived',axis=1
                                                     train['Survived'], test_size=0.20, 
                                                     random_state=RANDOM_STATE)
 
-gbdtmodel = GradientBoostingClassifier(n_estimators=800,
+gbdtmodel = GradientBoostingClassifier(n_estimators=300,
                                        learning_rate = 0.04,
+                                       max_depth=3,
+                                       min_samples_leaf=1,
                                        random_state=RANDOM_STATE)
 
 gbdtmodel.fit(X_train,y_train)
