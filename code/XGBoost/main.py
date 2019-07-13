@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV, train_test_split
 from xgboost import XGBClassifier
+from sklearn.metrics import classification_report
 
 RANDOM_STATE = 1
 
@@ -71,32 +72,24 @@ def pro_test_data(test_datas):
     new_test_data_handle = test_datas.drop(to_drop, axis=1)
 
     return new_test_data_handle
-    
-train, test = pd.read_csv('../../data/train.csv'), pd.read_csv('../../data/test.csv')
 
-X_train, X_test, y_train, y_test = train_test_split(train.drop('Survived',axis=1), 
-                                                    train['Survived'], test_size=0.20, 
+train_data = pd.read_csv('../../data/train.csv')
+test_data = pd.read_csv('../../data/test.csv')
+pro_datas, target = pro_train_data(train_data)
+pre_datas = pro_test_data(test_data)
+
+X_train, X_test, y_train, y_test = train_test_split(pro_datas, target, test_size=0.20, 
                                                     random_state=RANDOM_STATE)
 
-pro_datas, target = pro_train_data(train)
-pre_datas = pro_test_data(test)
+xgcmodel = XGBClassifier(n_estimators=48, max_depth=4,
+                    n_jobs=-1, random_state=RANDOM_STATE)
+xgcmodel.fit(X_train, y_train)
 
-xgc = XGBClassifier()
-xgc_param = {
-    'n_estimators': range(30, 50, 2),
-    'max_depth': range(2, 7, 1)
-}
+train_predictions = xgcmodel.predict(X_test)
+print(classification_report(y_test, train_predictions, digits=4))
 
-gc = GridSearchCV(xgc, param_grid=xgc_param, cv=5)
-gc.fit(X_train, y_train)
-print("训练集样本为：", X_train.shape[0])
-print("测试集样本为：", X_test.shape[0])
-print("预测率为：", gc.score(X_test, y_test))
-print("交叉验证最好结果：", gc.best_score_)
-print("交叉验证最好参数模型：", gc.best_estimator_)
-predictions = gc.predict(pre_datas)
+predictions = pd.DataFrame(xgcmodel.predict(pre_datas), columns= ['Survived'])
 
-
-predictions = pd.concat([test['PassengerId'], predictions], axis=1, join='inner')
+predictions = pd.concat([test_data['PassengerId'], predictions], axis=1, join='inner')
 
 predictions.to_csv('predictions.csv' , index=False)
